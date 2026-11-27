@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JuraganLele — Sistem Informasi Akuntansi & Budidaya Lele</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-emerald-50/30 text-slate-800 antialiased">
+
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-emerald-100 text-slate-600 flex flex-col justify-between shrink-0 hidden lg:flex">
+            <div>
+                <div class="p-6 border-b border-emerald-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+                            <i data-lucide="fish" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-slate-900 font-bold text-lg leading-none">JuraganLele</h1>
+                            <p class="text-[11px] text-emerald-600 font-semibold mt-1">PSAK 69 Aquaculture</p>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="p-4 space-y-5 text-xs">
+                    <!-- 1. DASHBOARD -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">1. Dashboard</p>
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4 text-emerald-600"></i>
+                            Dashboard Utama
+                        </button>
+                    </div>
+
+                    <!-- 2. OPERASIONAL -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">2. Operasional</p>
+                        <div class="space-y-1">
+                            <button onclick="switchTab('siklus')" id="nav-siklus" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                                <i data-lucide="waves" class="w-4 h-4 text-emerald-600"></i>
+                                Siklus Kolam & Tebar Benih
+                            </button>
+                            <button onclick="switchTab('harian')" id="nav-harian" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                                <i data-lucide="clipboard-list" class="w-4 h-4 text-sky-600"></i>
+                                Pakan, Vitamin & Mortalitas
+                            </button>
+                            <button onclick="switchTab('panen')" id="nav-panen" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                                <i data-lucide="scale" class="w-4 h-4 text-amber-600"></i>
+                                Panen & Penjualan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. PERSEDIAAN -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">3. Persediaan</p>
+                        <button onclick="switchTab('persediaan')" id="nav-persediaan" class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                            <span class="flex items-center gap-2.5">
+                                <i data-lucide="package" class="w-4 h-4 text-teal-600"></i>
+                                Stok Pakan, Benih & Belanja
+                            </span>
+                            <span id="badgeLowStock" class="hidden px-1.5 py-0.5 text-[10px] rounded-full bg-rose-100 text-rose-700 font-bold">!</span>
+                        </button>
+                    </div>
+
+                    <!-- 4. KEUANGAN -->
+                    <div>
+                        <p class="px-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">4. Keuangan</p>
+                        <div class="space-y-1">
+                            <button onclick="switchTab('bukubesar')" id="nav-bukubesar" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                                <i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i>
+                                Buku Besar & Neraca (PSAK 69)
+                            </button>
+                            <button onclick="switchTab('labarugi')" id="nav-labarugi" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-purple-600"></i>
+                                Laba Rugi per Siklus
+                            </button>
+                            <button onclick="switchTab('aruskas')" id="nav-aruskas" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50/70 transition text-left font-medium">
+                                <i data-lucide="arrow-left-right" class="w-4 h-4 text-cyan-600"></i>
+                                Laporan Arus Kas
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-emerald-100">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white/90 backdrop-blur-md border-b border-emerald-100 px-6 lg:px-8 py-3.5 flex items-center justify-between sticky top-0 z-10">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span class="font-bold text-emerald-700 lg:hidden">JuraganLele</span>
+                    <span class="hidden lg:inline">Workspace</span>
+                    <span>/</span>
+                    <span id="breadcrumbTitle" class="font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Dashboard Utama</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="switchTab('harian')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200">+ Log Harian</button>
+                    <button onclick="switchTab('panen')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700">+ Input Panen</button>
+                </div>
+            </header>
+
+            <!-- Content Container -->
+            <div class="p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+
+                <!-- ========================================================= -->
+                <!-- 1. TAB DASHBOARD UTAMA                                    -->
+                <!-- ========================================================= -->
+                <section id="tab-dashboard" class="space-y-6">
+                    <!-- Filter Periode Analisis -->
+                    <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Executive Dashboard</h2>
+                            <p class="text-xs text-slate-500">Ringkasan eksekutif kesehatan finansial & performa teknis budidaya.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <input type="date" id="filterStart" value="2026-09-01" class="border border-slate-200 rounded-lg px-2.5 py-1.5">
+                            <span>s/d</span>
+                            <input type="date" id="filterEnd" value="2026-11-30" class="border border-slate-200 rounded-lg px-2.5 py-1.5">
+                            <select id="filterSiklusDash" onchange="refreshDashboard()" class="border border-emerald-300 rounded-lg px-3 py-1.5 bg-emerald-50/40 font-medium">
+                                <option value="ALL">Semua Siklus / Kolam</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- BARIS ATAS: 4 KARTU METRIK KEUANGAN -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Penjualan Bersih Panen</span>
+                            <p id="kpiPenjualanBersih" class="text-xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p id="kpiSubPenjualan" class="text-[11px] text-emerald-600 mt-1">Setelah potongan susut timbang</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">HPP Panen Terjual</span>
+                            <p id="kpiHppPanen" class="text-xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Benih, pakan, vitamin & TKL</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Laba Kotor</span>
+                            <p id="kpiLabaKotor" class="text-xl font-bold text-emerald-600 mt-2">Rp 0</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Penjualan Bersih - HPP</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Laba Bersih</span>
+                            <p id="kpiLabaBersih" class="text-xl font-bold text-teal-700 mt-2">Rp 0</p>
+                            <p id="kpiSubBebanNonKolam" class="text-[11px] text-slate-400 mt-1">Dikurangi listrik, gaji & penyusutan</p>
+                        </div>
+                    </div>
+
+                    <!-- BARIS BAWAH: 4 KARTU METRIK ASET & LIKUIDITAS -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Saldo Kas & Bank</span>
+                            <p id="kpiKasBank" class="text-xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Dana tunai & rekening operasional</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Aset Biologis & Persediaan</span>
+                            <p id="kpiAsetDanStok" class="text-xl font-bold text-sky-600 mt-2">Rp 0</p>
+                            <p id="kpiRincianAset" class="text-[11px] text-slate-400 mt-1">Biologis + Stok Gudang</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Piutang Pengepul / Pelanggan</span>
+                            <p id="kpiPiutang" class="text-xl font-bold text-amber-600 mt-2">Rp 0</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Tagihan panen tempo</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Utang Supplier Pakan/Benih</span>
+                            <p id="kpiUtang" class="text-xl font-bold text-rose-600 mt-2">Rp 0</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Kewajiban ke toko pakan/hatchery</p>
+                        </div>
+                    </div>
+
+                    <!-- BARIS INDIKATOR PERFORMA BUDIDAYA (RINGKASAN TEKNIS) -->
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-5 text-white grid grid-cols-1 md:grid-cols-3 gap-4 shadow-md">
+                        <div>
+                            <p class="text-xs text-emerald-100">Rata-rata FCR (Feed Conversion Ratio)</p>
+                            <p id="techFcr" class="text-2xl font-bold mt-1">1.04</p>
+                            <p class="text-[11px] text-emerald-200">Target ideal pembesaran: &le; 1.10</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-emerald-100">Tingkat Kelangsungan Hidup (Survival Rate)</p>
+                            <p id="techSr" class="text-2xl font-bold mt-1">94.2%</p>
+                            <p class="text-[11px] text-emerald-200">Rasio populasi hidup vs tebar awal</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-emerald-100">Estimasi Biomassa Siap Panen</p>
+                            <p id="techBiomassa" class="text-2xl font-bold mt-1">0 kg</p>
+                            <p class="text-[11px] text-emerald-200">Berdasarkan populasi & sampling ABW</p>
+                        </div>
+                    </div>
+
+                    <!-- CHART 1: MULTI-LINE CHART PENDAPATAN PANEN VS TOTAL HPP & BIAYA OPERASIONAL -->
+                    <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900">Tren Profitabilitas: Pendapatan Panen vs. Total HPP & Biaya Operasional</h3>
+                                <p class="text-xs text-slate-400">Evaluasi efisiensi biaya terhadap kenaikan omzet panen per siklus/bulan</p>
+                            </div>
+                        </div>
+                        <div class="h-72">
+                            <canvas id="chartDashProfit"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 2A. TAB OPERASIONAL: SIKLUS KOLAM, TEBAR & MUTASI/GRADING -->
+                <!-- ========================================================= -->
+                <section id="tab-siklus" class="hidden space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Siklus Kolam, Tebar Benih & Mutasi Grading</h2>
+                            <p class="text-xs text-slate-500">Kelola Master Kolam, buka siklus Job Costing baru, dan mutasi sortir ukuran antar-kolam.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openModal('modalMasterKolam')" class="px-3 py-2 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-xs font-semibold hover:bg-emerald-50">+ Master Kolam</button>
+                            <button onclick="openModal('modalMutasi')" class="px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold hover:bg-amber-100">Mutasi / Grading</button>
+                            <button onclick="openModal('modalTebar')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">+ Buka Siklus (Tebar)</button>
+                        </div>
+                    </div>
+
+                    <!-- Master Data Kolam Cards -->
+                    <div id="gridMasterKolam" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+                    <!-- Tabel Kartu Biaya Siklus (Job Costing) -->
+                    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 font-bold text-sm text-slate-800">Kartu Biaya Siklus Aktif (Aset Biologis - PSAK 69)</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-emerald-50/50 text-slate-600">
+                                    <tr>
+                                        <th class="px-5 py-3">Kode Siklus / Kolam</th>
+                                        <th class="px-5 py-3">Tgl Tebar & Ukuran</th>
+                                        <th class="px-5 py-3">Populasi Hidup</th>
+                                        <th class="px-5 py-3">ABW & Est. Biomassa</th>
+                                        <th class="px-5 py-3">Akumulasi Biaya</th>
+                                        <th class="px-5 py-3 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodySiklus" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 2B. TAB OPERASIONAL: PAKAN, VITAMIN, MORTALITAS & SAMPLING-->
+                <!-- ========================================================= -->
+                <section id="tab-harian" class="hidden space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Pakan, Vitamin, Mortalitas & Sampling FCR</h2>
+                            <p class="text-xs text-slate-500">Pencatatan harian yang memotong stok gudang, menambah HPP kolam, dan memantau kurva pertumbuhan.</p>
+                        </div>
+                        <button onclick="openModal('modalLogHarian')" class="px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700">+ Input Log Harian / Sampling</button>
+                    </div>
+
+                    <!-- 2 LINE CHARTS TEKNIS BUDIDAYA -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 mb-1">Grafik 1: Kurva Pertumbuhan Biomassa vs. Akumulasi Pakan (kg)</h3>
+                            <p class="text-xs text-slate-400 mb-4">Deteksi dini pemborosan pakan (overfeeding) dari minggu ke-1 hingga panen</p>
+                            <div class="h-64"><canvas id="chartKurvaPakan"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 mb-1">Grafik 2: Tren Mortalitas Harian (Ekor Mati)</h3>
+                            <p class="text-xs text-slate-400 mb-4">Deteksi dini pola wabah atau penurunan kualitas air sebelum kematian massal</p>
+                            <div class="h-64"><canvas id="chartMortalitas"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Riwayat Log Harian -->
+                    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 font-bold text-sm text-slate-800">Riwayat Pemberian Pakan, Vitamin, Mortalitas & Sampling</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-emerald-50/50 text-slate-600">
+                                    <tr>
+                                        <th class="px-5 py-3">Tanggal</th>
+                                        <th class="px-5 py-3">Siklus Kolam</th>
+                                        <th class="px-5 py-3">Pakan / Vitamin</th>
+                                        <th class="px-5 py-3">Biaya Masuk HPP</th>
+                                        <th class="px-5 py-3">Mortalitas</th>
+                                        <th class="px-5 py-3">Sampling ABW</th>
+                                        <th class="px-5 py-3 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyLogHarian" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 2C. TAB OPERASIONAL: PANEN & PENJUALAN                    -->
+                <!-- ========================================================= -->
+                <section id="tab-panen" class="hidden space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Panen & Penjualan (Kalkulator HPP Otomatis)</h2>
+                            <p class="text-xs text-slate-500">Input berat kotor, potongan susut air, kategori ukuran panen, dan metode pembayaran.</p>
+                        </div>
+                        <button onclick="openModal('modalPanenBaru')" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">+ Input Hasil Panen</button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-emerald-50/50 text-slate-600">
+                                    <tr>
+                                        <th class="px-5 py-3">Tanggal</th>
+                                        <th class="px-5 py-3">Pembeli & Kategori</th>
+                                        <th class="px-5 py-3">Berat Bersih (Kotor - Susut)</th>
+                                        <th class="px-5 py-3">Penjualan Bersih</th>
+                                        <th class="px-5 py-3">HPP / kg & Total HPP</th>
+                                        <th class="px-5 py-3">Pembayaran</th>
+                                        <th class="px-5 py-3 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPanen" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 3. TAB PERSEDIAAN: STOK PAKAN, BENIH, BELANJA & OPNAME    -->
+                <!-- ========================================================= -->
+                <section id="tab-persediaan" class="hidden space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Persediaan Gudang, Belanja & Stock Opname</h2>
+                            <p class="text-xs text-slate-500">Kartu stok gudang, peringatan stok minimum, belanja operasional, dan penyesuaian fisik.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openModal('modalOpname')" class="px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold hover:bg-amber-100">Stock Opname</button>
+                            <button onclick="openModal('modalBelanjaBaru')" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">+ Belanja Stok / Operasional</button>
+                        </div>
+                    </div>
+
+                    <!-- Low Stock Alert Banner -->
+                    <div id="lowStockAlertBox" class="hidden p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-3">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 shrink-0"></i>
+                        <div id="lowStockText"></div>
+                    </div>
+
+                    <!-- CHART 3: PERGERAKAN SISA STOK PAKAN VS FLUKTUASI HARGA BELI -->
+                    <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-1">Tren Konsumsi Stok Pakan (kg) vs. Fluktuasi Harga Beli Pakan (Rp/kg)</h3>
+                        <p class="text-xs text-slate-400 mb-4">Prediksi titik pemesanan ulang (reorder point) dan dampak kenaikan harga supplier</p>
+                        <div class="h-64"><canvas id="chartPersediaan"></canvas></div>
+                    </div>
+
+                    <!-- Tabel Kartu Stok Gudang -->
+                    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 font-bold text-sm text-slate-800">Kartu Stok Gudang (Average Cost)</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-emerald-50/50 text-slate-600">
+                                    <tr>
+                                        <th class="px-5 py-3">Nama Item</th>
+                                        <th class="px-5 py-3">Kategori</th>
+                                        <th class="px-5 py-3">Sisa Stok (Min)</th>
+                                        <th class="px-5 py-3">Harga Satuan</th>
+                                        <th class="px-5 py-3">Nilai Rupiah Stok</th>
+                                        <th class="px-5 py-3 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPersediaan" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 4A. TAB KEUANGAN: BUKU BESAR, JURNAL & NERACA (PSAK 69)   -->
+                <!-- ========================================================= -->
+                <section id="tab-bukubesar" class="hidden space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Jurnal Umum, Buku Besar & Neraca (PSAK 69)</h2>
+                            <p class="text-xs text-slate-500">Jurnal otomatis aktivitas budidaya, input jurnal penyesuaian manual, dan Laporan Posisi Keuangan.</p>
+                        </div>
+                        <button onclick="openModal('modalJurnalManual')" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700">+ Input Jurnal Manual (Gaji/Penyusutan)</button>
+                    </div>
+
+                    <!-- Ringkasan Neraca (Laporan Posisi Keuangan) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <h4 class="text-xs font-bold text-emerald-700 uppercase mb-3">ASET (PSAK 69)</h4>
+                            <div class="space-y-2 text-xs" id="neracaAsetList"></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <h4 class="text-xs font-bold text-rose-700 uppercase mb-3">KEWAJIBAN (LIABILITAS)</h4>
+                            <div class="space-y-2 text-xs" id="neracaKewajibanList"></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
+                            <h4 class="text-xs font-bold text-indigo-700 uppercase mb-3">EKUITAS / MODAL PETERNAKAN</h4>
+                            <div class="space-y-2 text-xs" id="neracaModalList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Jurnal Umum -->
+                    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 font-bold text-sm text-slate-800">Jurnal Umum & Buku Besar Otomatis</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-emerald-50/50 text-slate-600">
+                                    <tr>
+                                        <th class="px-5 py-3">Tanggal</th>
+                                        <th class="px-5 py-3">No. Bukti & Keterangan</th>
+                                        <th class="px-5 py-3">Akun Debit</th>
+                                        <th class="px-5 py-3">Akun Kredit</th>
+                                        <th class="px-5 py-3 text-right">Nominal (Rp)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyJurnal" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 4B. TAB KEUANGAN: LABA RUGI PER SIKLUS                    -->
+                <!-- ========================================================= -->
+                <section id="tab-labarugi" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Laporan Laba Rugi Komprehensif & Analisis per Siklus</h2>
+                        <p class="text-xs text-slate-500">Perbandingan profitabilitas, efisiensi biaya pakan, dan rasio FCR terbaik antar kolam.</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 font-bold text-sm text-slate-800">Analisis Profitabilitas per Kolam / Siklus</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-emerald-50/50 text-slate-600">
+                                    <tr>
+                                        <th class="px-5 py-3">Siklus / Kolam</th>
+                                        <th class="px-5 py-3">Total Penjualan</th>
+                                        <th class="px-5 py-3">Total HPP</th>
+                                        <th class="px-5 py-3">Laba Kotor</th>
+                                        <th class="px-5 py-3">Margin (%)</th>
+                                        <th class="px-5 py-3">FCR Aktual</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyProfitSiklus" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================= -->
+                <!-- 4C. TAB KEUANGAN: LAPORAN ARUS KAS (CASH FLOW)            -->
+                <!-- ========================================================= -->
+                <section id="tab-aruskas" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Laporan Arus Kas (Cash Flow Statement)</h2>
+                        <p class="text-xs text-slate-500">Pemisahan arus kas aktivitas Operasional Budidaya, Investasi Kolam, dan Pendanaan.</p>
+                    </div>
+
+                    <!-- CHART 4: TREN ARUS KAS MASUK (INFLOW) VS KELUAR (OUTFLOW) -->
+                    <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-1">Tren Arus Kas Masuk (Inflow) vs. Arus Kas Keluar (Outflow)</h3>
+                        <p class="text-xs text-slate-400 mb-4">Menjaga likuiditas kas selama masa tunggu budidaya 2–3 bulan sebelum panen</p>
+                        <div class="h-64"><canvas id="chartArusKas"></canvas></div>
+                    </div>
+
+                    <!-- Ringkasan 3 Aktivitas Arus Kas -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="ringkasanArusKasCards"></div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- KUMPULAN MODAL INPUT & KOREKSI (CRUD LENGKAP)             -->
+    <!-- ========================================================= -->
+
+    <!-- Modal Master Kolam -->
+    <div id="modalMasterKolam" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Tambah Master Data Kolam</h3>
+            <form id="formMasterKolam" class="space-y-3 text-xs">
+                <input type="text" id="mkNama" required placeholder="Nama Kolam (misal: Kolam Terpal A4)" class="w-full border rounded-xl px-3 py-2">
+                <select id="mkJenis" class="w-full border rounded-xl px-3 py-2 bg-white">
+                    <option value="Terpal">Kolam Terpal</option>
+                    <option value="Beton">Kolam Beton</option>
+                    <option value="Tanah">Kolam Tanah</option>
+                </select>
+                <input type="number" id="mkKapasitas" required placeholder="Kapasitas Maksimal (Ekor)" class="w-full border rounded-xl px-3 py-2">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalMasterKolam')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Simpan Kolam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Buka Siklus (Tebar Benih) -->
+    <div id="modalTebar" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Buka Siklus Baru (Tebar Benih)</h3>
+            <form id="formTebar" class="space-y-3 text-xs">
+                <select id="tbKolam" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <select id="tbBenih" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <input type="text" id="tbUkuran" value="5-7 cm" placeholder="Ukuran Tebar (misal: 5-7 cm)" class="w-full border rounded-xl px-3 py-2">
+                <input type="number" id="tbJumlah" required placeholder="Jumlah Benih Ditebar (Ekor)" class="w-full border rounded-xl px-3 py-2">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalTebar')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Mulai Siklus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Mutasi & Grading -->
+    <div id="modalMutasi" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-1">Mutasi & Grading (Sortir Ukuran)</h3>
+            <p class="text-[11px] text-slate-500 mb-3">Memindahkan sebagian populasi beserta porsi nilai aset biologis ke kolam tujuan.</p>
+            <form id="formMutasi" class="space-y-3 text-xs">
+                <select id="mtAsal" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <select id="mtTujuan" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <input type="number" id="mtJumlah" required placeholder="Jumlah Ikan Dipindah (Ekor)" class="w-full border rounded-xl px-3 py-2">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalMutasi')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white font-semibold">Proses Mutasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Log Harian (Pakan, Vitamin, Mortalitas & Sampling ABW) -->
+    <div id="modalLogHarian" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Input Pakan, Vitamin, Mortalitas & Sampling</h3>
+            <form id="formLogHarian" class="space-y-3 text-xs">
+                <select id="lhSiklus" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <select id="lhBarang" class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.1" id="lhPakanKg" value="0" placeholder="Berat Pakan/Obat (kg/btl)" class="w-full border rounded-xl px-3 py-2">
+                    <input type="number" step="0.1" id="lhSamplingAbw" placeholder="Sampling ABW (gram/ekor)" class="w-full border rounded-xl px-3 py-2">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="lhMati" value="0" placeholder="Ikan Mati (Ekor)" class="w-full border rounded-xl px-3 py-2">
+                    <select id="lhPenyebab" class="w-full border rounded-xl px-3 py-2 bg-white">
+                        <option value="Normal / Kanibalisme">Normal / Kanibalisme</option>
+                        <option value="Jamur / Kualitas Air">Jamur / Kualitas Air</option>
+                        <option value="Wabah Penyakit (Abnormal)">Wabah (Kerugian Abnormal)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalLogHarian')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold">Simpan Log Harian</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Panen & Penjualan -->
+    <div id="modalPanenBaru" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Input Hasil Panen & Penjualan</h3>
+            <form id="formPanenBaru" class="space-y-3 text-xs">
+                <select id="pnSiklus" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <input type="text" id="pnPembeli" required placeholder="Nama Pembeli / Pengepul / Warung" class="w-full border rounded-xl px-3 py-2">
+                <select id="pnKategori" class="w-full border rounded-xl px-3 py-2 bg-white">
+                    <option value="Konsumsi (Isi 7-9 ekor/kg)">Konsumsi (Isi 7-9 ekor/kg)</option>
+                    <option value="Sortir Besar / Indukan">Sortir Besar</option>
+                    <option value="Lele Reject / Kecil">Lele Reject / Kecil</option>
+                </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.1" id="pnBeratKotor" required placeholder="Berat Kotor (kg)" class="w-full border rounded-xl px-3 py-2">
+                    <input type="number" step="0.1" id="pnSusut" value="0" placeholder="Potongan Susut Air (kg)" class="w-full border rounded-xl px-3 py-2">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="pnHargaKg" required placeholder="Harga Jual / kg (Rp)" class="w-full border rounded-xl px-3 py-2">
+                    <select id="pnMetode" class="w-full border rounded-xl px-3 py-2 bg-white">
+                        <option value="Tunai">Tunai</option>
+                        <option value="Transfer">Transfer Bank</option>
+                        <option value="Tempo/Piutang">Tempo / Piutang</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalPanenBaru')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Proses Panen & Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Belanja Stok / Operasional -->
+    <div id="modalBelanjaBaru" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Belanja Stok Gudang / Biaya Operasional</h3>
+            <form id="formBelanjaBaru" class="space-y-3 text-xs">
+                <input type="text" id="blNama" required placeholder="Nama Item (misal: Pelet 781 / Listrik Pompa)" class="w-full border rounded-xl px-3 py-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="blKategori" class="w-full border rounded-xl px-3 py-2 bg-white">
+                        <option value="Pakan">Persediaan Pakan</option>
+                        <option value="Benih">Persediaan Benih</option>
+                        <option value="Obat/Vitamin">Obat & Vitamin</option>
+                        <option value="Beban Non-Kolam">Beban Listrik / Gaji Non-Kolam</option>
+                    </select>
+                    <select id="blBayar" class="w-full border rounded-xl px-3 py-2 bg-white">
+                        <option value="Tunai">Bayar Tunai / Transfer</option>
+                        <option value="Utang Supplier">Utang Supplier (Tempo)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.1" id="blQty" required placeholder="Jumlah (kg/ekor/paket)" class="w-full border rounded-xl px-3 py-2">
+                    <input type="number" id="blHarga" required placeholder="Harga Satuan (Rp)" class="w-full border rounded-xl px-3 py-2">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalBelanjaBaru')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Simpan Transaksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Stock Opname -->
+    <div id="modalOpname" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-1">Stock Opname Gudang</h3>
+            <p class="text-[11px] text-slate-500 mb-3">Selisih stok rusak/lembap otomatis dijurnal ke Beban Selisih Persediaan.</p>
+            <form id="formOpname" class="space-y-3 text-xs">
+                <select id="opBarang" required class="w-full border rounded-xl px-3 py-2 bg-white"></select>
+                <input type="number" step="0.1" id="opFisik" required placeholder="Jumlah Stok Fisik Aktual di Gudang" class="w-full border rounded-xl px-3 py-2">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalOpname')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white font-semibold">Sesuaikan Stok</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Jurnal Manual -->
+    <div id="modalJurnalManual" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Input Jurnal Umum Manual</h3>
+            <form id="formJurnalManual" class="space-y-3 text-xs">
+                <input type="text" id="jmKet" required placeholder="Keterangan (misal: Penyusutan Kolam Terpal)" class="w-full border rounded-xl px-3 py-2">
+                <input type="text" id="jmDebit" required placeholder="Akun Debit (misal: Beban Penyusutan Kolam)" class="w-full border rounded-xl px-3 py-2">
+                <input type="text" id="jmKredit" required placeholder="Akun Kredit (misal: Akumulasi Penyusutan Kolam)" class="w-full border rounded-xl px-3 py-2">
+                <input type="number" id="jmNominal" required placeholder="Nominal (Rp)" class="w-full border rounded-xl px-3 py-2">
+                <select id="jmArusKas" class="w-full border rounded-xl px-3 py-2 bg-white">
+                    <option value="Non-Kas">Non-Kas (Penyusutan / Akrual)</option>
+                    <option value="Operasional">Arus Kas Operasional</option>
+                    <option value="Investasi">Arus Kas Investasi Kolam/Alat</option>
+                    <option value="Pendanaan">Arus Kas Pendanaan / Modal</option>
+                </select>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalJurnalManual')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold">Posting Jurnal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Siklus (Koreksi Data) -->
+    <div id="modalEditSiklus" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-base font-bold mb-3">Koreksi Data Siklus Kolam</h3>
+            <form id="formEditSiklus" class="space-y-3 text-xs">
+                <input type="hidden" id="edSiklusId">
+                <input type="number" id="edPopulasi" required placeholder="Koreksi Populasi Hidup (Ekor)" class="w-full border rounded-xl px-3 py-2">
+                <input type="number" id="edBiaya" required placeholder="Koreksi Akumulasi Biaya (Rp)" class="w-full border rounded-xl px-3 py-2">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modalEditSiklus')" class="px-4 py-2 rounded-xl bg-slate-100">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white font-semibold">Simpan Koreksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
